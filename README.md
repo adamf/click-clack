@@ -14,8 +14,12 @@ click-clack/
 │   ├── schematic.txt    ASCII wiring diagram for perfboard build
 │   └── pinout.md        Pin assignments
 └── case/
-    └── click-clack.scad  Parametric OpenSCAD case
+    ├── click-clack.scad  Parametric OpenSCAD case
+    ├── render-preview.png Assembled render
+    └── stl/              Ready-to-slice meshes (STL + Bambu 3MF)
 ```
+
+![assembled case](case/render-preview.png)
 
 ## Hardware
 
@@ -33,6 +37,54 @@ See `hardware/pinout.md` for the full pin map and `hardware/schematic.txt` for w
 cd firmware
 pio run -t upload
 pio device monitor
+```
+
+## Case / 3D printing (Bambu Lab)
+
+The case is two printed parts: a wedge-shaped lower **shell** and an angled
+**top plate** that the switches and OLEDs mount into. Ready-to-slice meshes
+are in `case/stl/` (both STL and Bambu Studio's native 3MF); the source of
+truth is the parametric `case/click-clack.scad`.
+
+| Part | File | Size | Orientation |
+|---|---|---|---|
+| Lower shell | `click-clack-bottom.{stl,3mf}` | 220 × 90 × 55 mm | floor on the bed |
+| Top plate   | `click-clack-top.{stl,3mf}`    | 214 × 87 × 4 mm | flat, cosmetic face on the bed |
+
+Both parts fit a 256 × 256 mm Bambu bed (X1 / X1C / P1S / P1P / A1) with room
+to spare. The **A1 mini** (180 × 180) is too small for the 220 mm width.
+
+Slice in **Bambu Studio** (drop in the 3MF, or import the STL):
+
+- **Filament:** PETG or PLA+ — a chess clock gets slapped, and PETG shrugs off
+  the repeated impact better than plain PLA.
+- **Layer:** 0.20 mm · **Walls:** 4 perimeters · **Infill:** 20–30 % gyroid.
+- **Supports:** none. The USB-C cutout is a short 10 mm bridge, the switch
+  reliefs open upward, and every post is vertical.
+- **Adhesion:** 5 mm brim on the shell — 220 mm of flat footprint can lift at
+  the corners without one.
+
+### Built to take a beating
+
+Players hammer these buttons, so the top plate is engineered for it:
+
+- 4 mm top plate (up from 3 mm) on a full-perimeter ledge — no corner-only span.
+- Six M3 screw posts (corners + front/back centre) clamp the plate down.
+- Two interior **support pillars** rise from the floor directly behind the
+  player paddles, so a hard press transfers straight into the shell instead of
+  flexing the plate.
+- Each MX cutout has a proper 1.5 mm clip land with an underside relief, so the
+  switches actually snap in and stay put under load.
+
+Use M3 brass heat-set inserts in the shell posts and M3 screws (8–10 mm)
+through the counterbores in the top plate.
+
+Regenerate the meshes after editing the `.scad`:
+
+```
+cd case
+openscad -o stl/click-clack-bottom.stl -D 'part="bottom"' click-clack.scad
+openscad -o stl/click-clack-top.stl    -D 'part="top"'    click-clack.scad
 ```
 
 ## Controls (Chronos-style)
