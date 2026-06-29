@@ -1,0 +1,430 @@
+(kicad_sch (version 20231120) (generator "click-clack-handwritten")
+  (uuid "11111111-1111-1111-1111-000000000000")
+  (paper "A4")
+
+  (title_block
+    (title "click-clack chess clock")
+    (date "2026-04-06")
+    (rev "A")
+    (company "")
+    (comment 1 "ESP32-S3 + 2x SSD1309 SPI OLED + 7x Cherry MX")
+    (comment 2 "Connectivity is conveyed via global labels. See netlist.md.")
+  )
+
+  (lib_symbols
+
+    ;; ----------- ESP32-S3 DevKitC (subset of pins we use) -----------
+    (symbol "click-clack:ESP32S3"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "U" (at 0 35 0)
+        (effects (font (size 1.27 1.27))))
+      (property "Value" "ESP32-S3-DevKitC" (at 0 32 0)
+        (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:ESP32S3_0_1"
+        (rectangle (start -15 30) (end 15 -30)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:ESP32S3_1_1"
+        (pin power_in     line (at -20 28 0) (length 5)
+          (name "5V")        (number "1"))
+        (pin power_in     line (at -20 25 0) (length 5)
+          (name "GND")       (number "2"))
+        (pin power_out    line (at -20 22 0) (length 5)
+          (name "3V3")       (number "3"))
+        (pin input        line (at -20 18 0) (length 5)
+          (name "GPIO1/VBAT_SENSE")  (number "4"))
+        (pin input        line (at -20 15 0) (length 5)
+          (name "GPIO2/CHRG_STAT")   (number "5"))
+        (pin bidirectional line (at -20 10 0) (length 5)
+          (name "GPIO4/BTN_P1")      (number "6"))
+        (pin bidirectional line (at -20 7 0) (length 5)
+          (name "GPIO5/BTN_P2")      (number "7"))
+        (pin bidirectional line (at -20 4 0) (length 5)
+          (name "GPIO6/BTN_MODE")    (number "8"))
+        (pin bidirectional line (at -20 1 0) (length 5)
+          (name "GPIO7/BTN_SET")     (number "9"))
+        (pin bidirectional line (at -20 -2 0) (length 5)
+          (name "GPIO15/BTN_UP")     (number "10"))
+        (pin bidirectional line (at -20 -5 0) (length 5)
+          (name "GPIO16/BTN_DOWN")   (number "11"))
+        (pin bidirectional line (at -20 -8 0) (length 5)
+          (name "GPIO17/BTN_CENTER") (number "12"))
+        (pin output       line (at 20 28 180) (length 5)
+          (name "GPIO12/SCK")        (number "13"))
+        (pin output       line (at 20 25 180) (length 5)
+          (name "GPIO11/MOSI")       (number "14"))
+        (pin output       line (at 20 22 180) (length 5)
+          (name "GPIO10/OLED_CS1")   (number "15"))
+        (pin output       line (at 20 19 180) (length 5)
+          (name "GPIO13/OLED_CS2")   (number "16"))
+        (pin output       line (at 20 16 180) (length 5)
+          (name "GPIO9/OLED_DC")     (number "17"))
+        (pin output       line (at 20 13 180) (length 5)
+          (name "GPIO8/OLED_RST")    (number "18"))
+        (pin output       line (at 20 8 180) (length 5)
+          (name "GPIO18/BUZZER")     (number "19"))
+      )
+    )
+
+    ;; ----------- SSD1309 SPI OLED 8-pin breakout -----------
+    (symbol "click-clack:OLED_SPI"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "DS" (at 0 15 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "SSD1309 2.42\"" (at 0 12 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:OLED_SPI_0_1"
+        (rectangle (start -10 10) (end 10 -14)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:OLED_SPI_1_1"
+        (pin power_in line (at -15 8 0)  (length 5) (name "GND")  (number "1"))
+        (pin power_in line (at -15 5 0)  (length 5) (name "VCC")  (number "2"))
+        (pin input    line (at -15 2 0)  (length 5) (name "SCK")  (number "3"))
+        (pin input    line (at -15 -1 0) (length 5) (name "MOSI") (number "4"))
+        (pin input    line (at -15 -4 0) (length 5) (name "RST")  (number "5"))
+        (pin input    line (at -15 -7 0) (length 5) (name "DC")   (number "6"))
+        (pin input    line (at -15 -10 0)(length 5) (name "CS")   (number "7"))
+      )
+    )
+
+    ;; ----------- TP4056 USB-C charger module -----------
+    (symbol "click-clack:TP4056"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "U" (at 0 15 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "TP4056-USBC" (at 0 12 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:TP4056_0_1"
+        (rectangle (start -12 10) (end 12 -10)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:TP4056_1_1"
+        (pin power_in  line (at -17 7 0)   (length 5) (name "USB_5V") (number "1"))
+        (pin power_in  line (at -17 4 0)   (length 5) (name "USB_GND")(number "2"))
+        (pin power_out line (at 17 7 180)  (length 5) (name "BAT+")   (number "3"))
+        (pin power_out line (at 17 4 180)  (length 5) (name "BAT-")   (number "4"))
+        (pin output    line (at 17 -4 180) (length 5) (name "CHRG")   (number "5"))
+      )
+    )
+
+    ;; ----------- MT3608 boost -----------
+    (symbol "click-clack:MT3608"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "U" (at 0 12 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "MT3608" (at 0 9 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:MT3608_0_1"
+        (rectangle (start -10 8) (end 10 -8)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:MT3608_1_1"
+        (pin power_in  line (at -15 5 0)   (length 5) (name "IN+")  (number "1"))
+        (pin power_in  line (at -15 2 0)   (length 5) (name "IN-")  (number "2"))
+        (pin power_out line (at 15 5 180)  (length 5) (name "OUT+") (number "3"))
+        (pin power_out line (at 15 2 180)  (length 5) (name "OUT-") (number "4"))
+      )
+    )
+
+    ;; ----------- MX switch -----------
+    (symbol "click-clack:MX_SW"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "SW" (at 0 5 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "Cherry MX" (at 0 2 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:MX_SW_0_1"
+        (rectangle (start -4 4) (end 4 -4)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:MX_SW_1_1"
+        (pin passive line (at -9 0 0) (length 5) (name "1") (number "1"))
+        (pin passive line (at 9 0 180) (length 5) (name "2") (number "2"))
+      )
+    )
+
+    ;; ----------- Resistor (generic) -----------
+    (symbol "click-clack:R"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "R" (at 0 4 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "R" (at 0 -4 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:R_0_1"
+        (rectangle (start -2 1) (end 2 -1)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:R_1_1"
+        (pin passive line (at -7 0 0) (length 5) (name "~") (number "1"))
+        (pin passive line (at 7 0 180) (length 5) (name "~") (number "2"))
+      )
+    )
+
+    ;; ----------- Battery -----------
+    (symbol "click-clack:Battery"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "BT" (at 0 8 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "1S LiPo 2000mAh" (at 0 5 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:Battery_0_1"
+        (rectangle (start -4 3) (end 4 -3)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:Battery_1_1"
+        (pin power_out line (at -9 0 0) (length 5) (name "+") (number "1"))
+        (pin power_out line (at 9 0 180) (length 5) (name "-") (number "2"))
+      )
+    )
+
+    ;; ----------- Buzzer -----------
+    (symbol "click-clack:Buzzer"
+      (pin_names (offset 0.508)) (in_bom yes) (on_board yes)
+      (property "Reference" "BZ" (at 0 6 0) (effects (font (size 1.27 1.27))))
+      (property "Value" "Piezo passive" (at 0 3 0) (effects (font (size 1.27 1.27))))
+      (property "Footprint" "" (at 0 0 0) (effects (font (size 1.27 1.27)) hide))
+      (symbol "click-clack:Buzzer_0_1"
+        (rectangle (start -3 2) (end 3 -2)
+          (stroke (width 0.254) (type default)) (fill (type background)))
+      )
+      (symbol "click-clack:Buzzer_1_1"
+        (pin passive line (at -8 0 0) (length 5) (name "+") (number "1"))
+        (pin passive line (at 8 0 180) (length 5) (name "-") (number "2"))
+      )
+    )
+  )
+
+  ;; ============================================================
+  ;; Symbol instances
+  ;; ============================================================
+
+  ;; --- ESP32-S3 (center) ---
+  (symbol (lib_id "click-clack:ESP32S3") (at 150 100 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000001")
+    (property "Reference" "U1" (at 150 65 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "ESP32-S3-DevKitC" (at 150 68 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "U1") (unit 1))))
+  )
+
+  ;; --- OLED #1 (left) ---
+  (symbol (lib_id "click-clack:OLED_SPI") (at 60 90 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000002")
+    (property "Reference" "DS1" (at 60 75 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SSD1309 2.42\" P1" (at 60 78 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "DS1") (unit 1))))
+  )
+
+  ;; --- OLED #2 (right) ---
+  (symbol (lib_id "click-clack:OLED_SPI") (at 240 90 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000003")
+    (property "Reference" "DS2" (at 240 75 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "SSD1309 2.42\" P2" (at 240 78 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "DS2") (unit 1))))
+  )
+
+  ;; --- TP4056 ---
+  (symbol (lib_id "click-clack:TP4056") (at 60 165 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000004")
+    (property "Reference" "U2" (at 60 150 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "TP4056 USB-C" (at 60 153 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "U2") (unit 1))))
+  )
+
+  ;; --- MT3608 ---
+  (symbol (lib_id "click-clack:MT3608") (at 130 165 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000005")
+    (property "Reference" "U3" (at 130 150 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "MT3608 boost 5V" (at 130 153 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "U3") (unit 1))))
+  )
+
+  ;; --- Battery ---
+  (symbol (lib_id "click-clack:Battery") (at 95 190 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000006")
+    (property "Reference" "BT1" (at 95 180 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "BT1") (unit 1))))
+  )
+
+  ;; --- Buzzer + series resistor ---
+  (symbol (lib_id "click-clack:R") (at 200 165 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000007")
+    (property "Reference" "R3" (at 200 160 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "220" (at 200 170 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "R3") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:Buzzer") (at 230 165 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000008")
+    (property "Reference" "BZ1" (at 230 158 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "BZ1") (unit 1))))
+  )
+
+  ;; --- Battery sense divider ---
+  (symbol (lib_id "click-clack:R") (at 200 185 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000009")
+    (property "Reference" "R1" (at 200 180 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "100k" (at 200 190 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "R1") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:R") (at 230 185 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-00000000000a")
+    (property "Reference" "R2" (at 230 180 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "100k" (at 230 190 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "R2") (unit 1))))
+  )
+
+  ;; --- 7 MX switches across the top ---
+  (symbol (lib_id "click-clack:MX_SW") (at 40 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-00000000000b")
+    (property "Reference" "SW1" (at 40 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "P1 (left paddle)" (at 40 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW1") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:MX_SW") (at 70 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-00000000000c")
+    (property "Reference" "SW2" (at 70 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "P2 (right paddle)" (at 70 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW2") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:MX_SW") (at 100 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-00000000000d")
+    (property "Reference" "SW3" (at 100 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Mode" (at 100 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW3") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:MX_SW") (at 130 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-00000000000e")
+    (property "Reference" "SW4" (at 130 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Set" (at 130 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW4") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:MX_SW") (at 160 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-00000000000f")
+    (property "Reference" "SW5" (at 160 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Up" (at 160 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW5") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:MX_SW") (at 190 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000010")
+    (property "Reference" "SW6" (at 190 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Down" (at 190 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW6") (unit 1))))
+  )
+  (symbol (lib_id "click-clack:MX_SW") (at 220 30 0) (unit 1)
+    (in_bom yes) (on_board yes) (uuid "22222222-0000-0000-0000-000000000011")
+    (property "Reference" "SW7" (at 220 22 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "Center/Reset" (at 220 38 0) (effects (font (size 1.27 1.27))))
+    (instances (project "click-clack"
+      (path "/11111111-1111-1111-1111-000000000000" (reference "SW7") (unit 1))))
+  )
+
+  ;; ============================================================
+  ;; Global labels carry the connectivity (no drawn wires).
+  ;; KiCad will treat same-named global labels as electrically joined.
+  ;; ============================================================
+
+  ;; ESP32 left side
+  (global_label "+5V"        (shape input)  (at 130 128 180) (uuid "33330000-0000-0000-0000-000000000001"))
+  (global_label "GND"        (shape input)  (at 130 125 180) (uuid "33330000-0000-0000-0000-000000000002"))
+  (global_label "+3V3"       (shape output) (at 130 122 180) (uuid "33330000-0000-0000-0000-000000000003"))
+  (global_label "VBAT_SENSE" (shape input)  (at 130 118 180) (uuid "33330000-0000-0000-0000-000000000004"))
+  (global_label "CHRG_STAT"  (shape input)  (at 130 115 180) (uuid "33330000-0000-0000-0000-000000000005"))
+  (global_label "BTN_P1"     (shape input)  (at 130 110 180) (uuid "33330000-0000-0000-0000-000000000006"))
+  (global_label "BTN_P2"     (shape input)  (at 130 107 180) (uuid "33330000-0000-0000-0000-000000000007"))
+  (global_label "BTN_MODE"   (shape input)  (at 130 104 180) (uuid "33330000-0000-0000-0000-000000000008"))
+  (global_label "BTN_SET"    (shape input)  (at 130 101 180) (uuid "33330000-0000-0000-0000-000000000009"))
+  (global_label "BTN_UP"     (shape input)  (at 130 98 180)  (uuid "33330000-0000-0000-0000-00000000000a"))
+  (global_label "BTN_DOWN"   (shape input)  (at 130 95 180)  (uuid "33330000-0000-0000-0000-00000000000b"))
+  (global_label "BTN_CENTER" (shape input)  (at 130 92 180)  (uuid "33330000-0000-0000-0000-00000000000c"))
+
+  ;; ESP32 right side
+  (global_label "SCK"        (shape output) (at 170 128 0) (uuid "33330000-0000-0000-0000-00000000000d"))
+  (global_label "MOSI"       (shape output) (at 170 125 0) (uuid "33330000-0000-0000-0000-00000000000e"))
+  (global_label "OLED_CS1"   (shape output) (at 170 122 0) (uuid "33330000-0000-0000-0000-00000000000f"))
+  (global_label "OLED_CS2"   (shape output) (at 170 119 0) (uuid "33330000-0000-0000-0000-000000000010"))
+  (global_label "OLED_DC"    (shape output) (at 170 116 0) (uuid "33330000-0000-0000-0000-000000000011"))
+  (global_label "OLED_RST"   (shape output) (at 170 113 0) (uuid "33330000-0000-0000-0000-000000000012"))
+  (global_label "BUZZER"     (shape output) (at 170 108 0) (uuid "33330000-0000-0000-0000-000000000013"))
+
+  ;; OLED #1 (DS1) labels
+  (global_label "GND"      (shape input) (at 45 98 180) (uuid "33330000-0000-0000-0000-000000000020"))
+  (global_label "+5V"      (shape input) (at 45 95 180) (uuid "33330000-0000-0000-0000-000000000021"))
+  (global_label "SCK"      (shape input) (at 45 92 180) (uuid "33330000-0000-0000-0000-000000000022"))
+  (global_label "MOSI"     (shape input) (at 45 89 180) (uuid "33330000-0000-0000-0000-000000000023"))
+  (global_label "OLED_RST" (shape input) (at 45 86 180) (uuid "33330000-0000-0000-0000-000000000024"))
+  (global_label "OLED_DC"  (shape input) (at 45 83 180) (uuid "33330000-0000-0000-0000-000000000025"))
+  (global_label "OLED_CS1" (shape input) (at 45 80 180) (uuid "33330000-0000-0000-0000-000000000026"))
+
+  ;; OLED #2 (DS2) labels
+  (global_label "GND"      (shape input) (at 225 98 180) (uuid "33330000-0000-0000-0000-000000000030"))
+  (global_label "+5V"      (shape input) (at 225 95 180) (uuid "33330000-0000-0000-0000-000000000031"))
+  (global_label "SCK"      (shape input) (at 225 92 180) (uuid "33330000-0000-0000-0000-000000000032"))
+  (global_label "MOSI"     (shape input) (at 225 89 180) (uuid "33330000-0000-0000-0000-000000000033"))
+  (global_label "OLED_RST" (shape input) (at 225 86 180) (uuid "33330000-0000-0000-0000-000000000034"))
+  (global_label "OLED_DC"  (shape input) (at 225 83 180) (uuid "33330000-0000-0000-0000-000000000035"))
+  (global_label "OLED_CS2" (shape input) (at 225 80 180) (uuid "33330000-0000-0000-0000-000000000036"))
+
+  ;; TP4056 labels
+  (global_label "USB_5V"  (shape input)  (at 43 172 180) (uuid "33330000-0000-0000-0000-000000000040"))
+  (global_label "GND"     (shape input)  (at 43 169 180) (uuid "33330000-0000-0000-0000-000000000041"))
+  (global_label "BAT+"    (shape output) (at 77 172 0)   (uuid "33330000-0000-0000-0000-000000000042"))
+  (global_label "GND"     (shape output) (at 77 169 0)   (uuid "33330000-0000-0000-0000-000000000043"))
+  (global_label "CHRG_STAT" (shape output) (at 77 161 0) (uuid "33330000-0000-0000-0000-000000000044"))
+
+  ;; MT3608 labels
+  (global_label "BAT+" (shape input)  (at 115 170 180) (uuid "33330000-0000-0000-0000-000000000050"))
+  (global_label "GND"  (shape input)  (at 115 167 180) (uuid "33330000-0000-0000-0000-000000000051"))
+  (global_label "+5V"  (shape output) (at 145 170 0)   (uuid "33330000-0000-0000-0000-000000000052"))
+  (global_label "GND"  (shape output) (at 145 167 0)   (uuid "33330000-0000-0000-0000-000000000053"))
+
+  ;; Battery labels
+  (global_label "BAT+" (shape output) (at 86 190 180) (uuid "33330000-0000-0000-0000-000000000060"))
+  (global_label "GND"  (shape output) (at 104 190 0)  (uuid "33330000-0000-0000-0000-000000000061"))
+
+  ;; Buzzer chain: GPIO18 -> R3 -> BZ1 -> GND
+  (global_label "BUZZER"   (shape input)  (at 193 165 180) (uuid "33330000-0000-0000-0000-000000000070"))
+  (global_label "BZ_DRIVE" (shape output) (at 207 165 0)   (uuid "33330000-0000-0000-0000-000000000071"))
+  (global_label "BZ_DRIVE" (shape input)  (at 222 165 180) (uuid "33330000-0000-0000-0000-000000000072"))
+  (global_label "GND"      (shape output) (at 238 165 0)   (uuid "33330000-0000-0000-0000-000000000073"))
+
+  ;; Battery sense divider
+  (global_label "BAT+"       (shape input)  (at 193 185 180) (uuid "33330000-0000-0000-0000-000000000080"))
+  (global_label "VBAT_SENSE" (shape output) (at 207 185 0)   (uuid "33330000-0000-0000-0000-000000000081"))
+  (global_label "VBAT_SENSE" (shape input)  (at 223 185 180) (uuid "33330000-0000-0000-0000-000000000082"))
+  (global_label "GND"        (shape output) (at 237 185 0)   (uuid "33330000-0000-0000-0000-000000000083"))
+
+  ;; Buttons: each switch has two pins; one to its BTN_x net, one to GND
+  (global_label "BTN_P1"     (shape input)  (at 31 30 180) (uuid "33330000-0000-0000-0000-000000000090"))
+  (global_label "GND"        (shape output) (at 49 30 0)   (uuid "33330000-0000-0000-0000-000000000091"))
+  (global_label "BTN_P2"     (shape input)  (at 61 30 180) (uuid "33330000-0000-0000-0000-000000000092"))
+  (global_label "GND"        (shape output) (at 79 30 0)   (uuid "33330000-0000-0000-0000-000000000093"))
+  (global_label "BTN_MODE"   (shape input)  (at 91 30 180) (uuid "33330000-0000-0000-0000-000000000094"))
+  (global_label "GND"        (shape output) (at 109 30 0)  (uuid "33330000-0000-0000-0000-000000000095"))
+  (global_label "BTN_SET"    (shape input)  (at 121 30 180)(uuid "33330000-0000-0000-0000-000000000096"))
+  (global_label "GND"        (shape output) (at 139 30 0)  (uuid "33330000-0000-0000-0000-000000000097"))
+  (global_label "BTN_UP"     (shape input)  (at 151 30 180)(uuid "33330000-0000-0000-0000-000000000098"))
+  (global_label "GND"        (shape output) (at 169 30 0)  (uuid "33330000-0000-0000-0000-000000000099"))
+  (global_label "BTN_DOWN"   (shape input)  (at 181 30 180)(uuid "33330000-0000-0000-0000-00000000009a"))
+  (global_label "GND"        (shape output) (at 199 30 0)  (uuid "33330000-0000-0000-0000-00000000009b"))
+  (global_label "BTN_CENTER" (shape input)  (at 211 30 180)(uuid "33330000-0000-0000-0000-00000000009c"))
+  (global_label "GND"        (shape output) (at 229 30 0)  (uuid "33330000-0000-0000-0000-00000000009d"))
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)

@@ -1,0 +1,66 @@
+click-clack — perfboard schematic (ASCII)
+==========================================
+
+                              ┌──────────────────────┐
+        USB-C  ──────────────►│  TP4056 USB-C w/     │
+                              │  DW01 protection     │
+                              │                      │
+                              │  BAT+  ──┬────────── │──► to MT3608 IN+
+                              │  BAT-  ──┼────────── │──► GND
+                              │  CHRG  ──┼────────── │──► GPIO2 (status LED tap)
+                              └──────────┼───────────┘
+                                         │
+                                  1S LiPo 2000mAh
+                                         │
+                                         ▼
+                              ┌──────────────────────┐
+                              │  MT3608 boost        │
+                              │  Vin 3.0–4.2V        │
+                              │  Vout set to 5.0V    │
+                              └──────────┬───────────┘
+                                         │ 5V rail
+                ┌────────────────────────┼────────────────────────┐
+                │                        │                        │
+                ▼                        ▼                        ▼
+       ESP32-S3 DevKitC 5V      OLED #1 VCC               OLED #2 VCC
+                │                        │                        │
+                ▼ (onboard LDO)          ▼                        ▼
+              3.3V                      GND                      GND
+
+
+SPI bus
+-------
+   ESP32-S3        OLED #1 (Player 1)         OLED #2 (Player 2)
+   GPIO12 SCK ───┬── SCK                  ┬── SCK
+   GPIO11 MOSI ──┤── MOSI (D1/SDA)        ┤── MOSI (D1/SDA)
+                 │                        │
+   GPIO10 CS  ───┘── CS                   │
+   GPIO13 CS  ──────────────────────────  ┘── CS
+   GPIO9  DC  ───┬── DC                   ┬── DC
+   GPIO8  RST ───┴── RST                  ┴── RST
+
+
+Buttons (all to GND, MCU uses internal pull-ups)
+------------------------------------------------
+   GPIO4  ──[ MX P1 ]── GND      (left player paddle)
+   GPIO5  ──[ MX P2 ]── GND      (right player paddle)
+   GPIO6  ──[ MX MODE ]── GND
+   GPIO7  ──[ MX SET  ]── GND
+   GPIO15 ──[ MX UP   ]── GND
+   GPIO16 ──[ MX DOWN ]── GND
+   GPIO17 ──[ MX CENTER ]── GND  (small reset/pause)
+
+
+Buzzer
+------
+   GPIO18 ──[ 220Ω ]──┬── piezo + ── GND
+                      │
+                   (or gate of 2N7000 with piezo to 5V for louder)
+
+
+Battery sense
+-------------
+   BAT+ ──[ 100kΩ ]──┬──[ 100kΩ ]── GND
+                     │
+                     └── GPIO1 (ADC1_CH0)
+   max input ≈ 2.1V  (4.2V / 2)
