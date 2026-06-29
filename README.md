@@ -64,6 +64,39 @@ Slice in **Bambu Studio** (drop in the 3MF, or import the STL):
 - **Adhesion:** 5 mm brim on the shell — 220 mm of flat footprint can lift at
   the corners without one.
 
+### How to print it
+
+Start to finish on a Bambu Lab printer:
+
+1. **Install Bambu Studio** (free, from the Bambu Lab site) and pick your
+   printer + nozzle (0.4 mm) the first time you open it.
+2. **Load the parts.** `File → Import → Import 3MF/STL` and select both
+   `case/stl/click-clack-bottom.3mf` and `case/stl/click-clack-top.3mf` (or the
+   `.stl` versions). They drop onto the plate already in the correct print
+   orientation — shell floor-down, top plate flat — so **don't rotate them**.
+   To print both at once instead, import the single `click-clack-plate.3mf`.
+3. **Pick the filament** in the top-right dropdown (Bambu PETG HF or any
+   PETG/PLA+ you have loaded), and set the print profile to **0.20 mm
+   Standard**.
+4. **Apply the settings** from the list above: in *Quality* set Wall loops = 4;
+   in *Strength* set infill to 20–30 % Gyroid; in *Support* leave supports
+   **off**; in *Others → Brim* choose Outer brim, 5 mm. (Saving these as a
+   custom process preset means you only do it once.)
+5. **Slice** (top-right) and sanity-check the preview: ~6–8 h total and ~150 g
+   of filament for both parts. Scrub the layer slider — you should see no
+   support structures.
+6. **Print.** Send over the network or drop the `.3mf`/`.gcode` on the SD card.
+   Use a clean PEI plate; for PETG, a glue-stick layer stops it bonding *too*
+   hard. First-layer adhesion across the 220 mm shell is the main risk — that's
+   what the brim is for.
+7. **After printing:** peel the brim off, then press the M3 heat-set inserts
+   into the shell posts with a soldering iron (~200 °C, push in square and
+   let cool). The top plate screws down into them last, once the electronics
+   are mounted.
+
+No Bambu printer? The same STLs slice fine in PrusaSlicer/Cura, or upload them
+to a print service (see `BOM.md`).
+
 ### Built to take a beating
 
 Players hammer these buttons, so the top plate is engineered for it:
