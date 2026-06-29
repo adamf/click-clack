@@ -53,9 +53,12 @@ part of a bigger order, or getting an assortment from Amazon instead).
 
 ## 4. 3D print
 
-Either:
-- Print at home in **PLA or PETG**, ~150g of filament total — **~$3** in material
-- Or upload `case/click-clack.scad` (export to STL first) to **JLCPCB 3D Printing**, **PCBWay**, **Craftcloud**, or **Shapeways** — **~$25–40** in MJF or SLA
+Ready-to-slice meshes live in `case/stl/` (STL + Bambu Studio 3MF). Either:
+- Print at home in **PETG** (recommended — it takes the button-slapping better
+  than PLA) or PLA+, ~150g of filament total — **~$3** in material. On a Bambu
+  Lab printer just drop in the 3MF; see the README for the full profile.
+- Or upload the STLs to **JLCPCB 3D Printing**, **PCBWay**, **Craftcloud**, or
+  **Shapeways** — **~$25–40** in MJF or SLA
 
 ---
 
