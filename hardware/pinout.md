@@ -17,15 +17,16 @@ hardware SPI constructor).
 
 ## Buttons (all `INPUT_PULLUP`, switch to GND)
 
+Three buttons, Chronos-style. The center button handles pause/resume and —
+held down together with the clock buttons — every setting.
+
 | Button | GPIO |
 |---|---|
-| Player 1 (left big)  | 4  |
-| Player 2 (right big) | 5  |
-| Mode                 | 6  |
-| Set                  | 7  |
-| Up                   | 15 |
-| Down                 | 16 |
-| Center / Reset / Pause | 17 |
+| Left clock button  | 4  |
+| Right clock button | 5  |
+| Center             | 17 |
+
+GPIO 6, 7, 15, 16 (the old Mode/Set/Up/Down) are now free.
 
 ## Output / sense
 

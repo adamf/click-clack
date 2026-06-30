@@ -25,7 +25,7 @@ click-clack/
 
 - MCU: ESP32-S3-WROOM-1 DevKitC
 - Displays: 2× 2.42" SSD1309 128×64 SPI OLED
-- Switches: 7× Cherry MX (2 player, 4 menu, 1 center reset)
+- Switches: 3× Cherry MX (2 clock buttons + 1 center button, Chronos-style)
 - Power: 1S LiPo + USB-C TP4056 + MT3608 boost
 - Buzzer: passive piezo
 
@@ -103,8 +103,8 @@ Players hammer these buttons, so the top plate is engineered for it:
 
 - 4 mm top plate (up from 3 mm) on a full-perimeter ledge — no corner-only span.
 - Six M3 screw posts (corners + front/back centre) clamp the plate down.
-- Two interior **support pillars** rise from the floor directly behind the
-  player paddles, so a hard press transfers straight into the shell instead of
+- Two interior **support pillars** rise from the floor right behind the two
+  clock buttons, so a hard press transfers straight into the shell instead of
   flexing the plate.
 - Each MX cutout has a proper 1.5 mm clip land with an underside relief, so the
   switches actually snap in and stay put under load.
@@ -120,13 +120,23 @@ openscad -o stl/click-clack-bottom.stl -D 'part="bottom"' click-clack.scad
 openscad -o stl/click-clack-top.stl    -D 'part="top"'    click-clack.scad
 ```
 
-## Controls (Chronos-style)
+## Controls (Chronos-style, three buttons)
 
-- **Player buttons** (left/right): press to end your move and start opponent's clock
-- **Center small button**: pause / resume; long-press to reset to last loaded time control
-- **Mode**: cycle between RUN, MENU, OPTIONS
-- **Set**: in MENU, select field to edit; in OPTIONS, toggle setting
-- **Up/Down**: adjust value
+Just two clock buttons and one center button — exactly like a Chronos. The
+center button handles everything else through press-and-hold combos.
+
+**Playing:**
+- **Your clock button** (left / right): press to end your move and start the opponent
+- **Center, tap**: pause / resume
+- **Center, tap at flag**: start a fresh game with the loaded time control
+
+**Settings — hold the center button:**
+- **Hold center ~1s** (while stopped): enter SETUP (a beep confirms)
+- In SETUP: **tap center** = next field · **left** = decrease · **right** = increase
+- **Hold center ~1s** again: save, exit, and reset the clocks to the new control
+
+SETUP walks through a **Preset** (common controls applied to both sides), then
+per-side base/increment, then the options below.
 
 ## Time controls
 

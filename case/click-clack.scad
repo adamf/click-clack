@@ -55,7 +55,7 @@ LEDGE_W   = 2.5;   // width of the perimeter ledge the top plate rests on
 OLED_W      = 56;
 OLED_H      = 28;
 OLED_GAP_FROM_CENTER = 38;  // case centerline to inner edge of each OLED
-OLED_Y_OFFSET = 8;          // shift toward back of case (world Y)
+OLED_Y_OFFSET = -6;         // displays sit front-and-centre (world Y)
 
 // ---------- MX switch cutout ----------
 // Cherry MX plate mount: 14.0 x 14.0 mm square hole in a 1.5 mm plate.
@@ -65,33 +65,30 @@ MX          = 14.0;   // plate hole
 MX_PLATE_T  = 1.5;    // land thickness the clips snap against
 MX_RELIEF   = 16.0;   // underside relief so the clips can flex
 
-// Player paddles (the most-slapped buttons)
-PLAYER_X = 75;        // each paddle switch X offset from center
-PLAYER_Y = -22;       // toward front
+// Switch layout — Chronos style: just three buttons. The two clock buttons
+// sit diagonally (left toward the back, right toward the front) for big round
+// keycaps; one center button drives every setting via press-and-hold combos.
+P1_POS     = [-66,  26];   // left clock button  (back-left)
+P2_POS     = [ 66, -30];   // right clock button (front-right)
+CENTER_POS = [  0,  26];   // single center button (the "red square")
+SWITCHES   = [P1_POS, P2_POS, CENTER_POS];
 
-// Center small reset
-CENTER_Y = -22;
-
-// Aux row (mode/set/up/down) along the back
-AUX_Y = 18;
-AUX_SPACING = 18;
-AUX_X = [-AUX_SPACING*1.5, -AUX_SPACING*0.5, AUX_SPACING*0.5, AUX_SPACING*1.5];
-
-// ---------- USB-C cutout (back wall) ----------
+// ---------- USB-C cutout (lower back wall) ----------
 USBC_W = 10;
 USBC_H = 4;
-USBC_Z = 12;   // height above floor
+USBC_Z = 8;    // height above floor — low on the back, by the charge board
 
 // ---------- posts ----------
 // Screw posts take a heat-set insert and a screw from the top plate.
-// Support pillars just back up the plate under the load (no screw) — these
-// flank the player paddles so a hard press transfers straight to the floor.
+// Support pillars just back up the plate under the load (no screw) — these sit
+// right behind each clock button so a hard press transfers straight to the
+// floor instead of flexing the plate.
 POST_R   = 4.5;
 INSERT_R = 2.0;    // M3 heat-set insert (~4.0 mm hole)
 CX = W/2 - 6;      // post X at the corners
 CY = D/2 - 6;      // post Y at front/back edges
 SCREW_POSTS   = [[-CX,-CY], [CX,-CY], [-CX,CY], [CX,CY], [0,-CY], [0,CY]];
-SUPPORT_POSTS = [[-PLAYER_X,-CY], [PLAYER_X,-CY]];
+SUPPORT_POSTS = [[-66, 38], [66, -38]];   // behind P1, in front of P2
 
 // top-plate screw holes
 SCREW_CLEAR_R = 1.8;   // M3 clearance
@@ -202,10 +199,7 @@ module top_plate_flat() {
     difference() {
         translate([-lw/2, -ld/2, 0]) cube([lw, ld, TOP_T]);
         oled_hole(-1); oled_hole(1);
-        mx_hole(-PLAYER_X, PLAYER_Y);
-        mx_hole( PLAYER_X, PLAYER_Y);
-        mx_hole(0, CENTER_Y);
-        for (x = AUX_X) mx_hole(x, AUX_Y);
+        for (s = SWITCHES) mx_hole(s[0], s[1]);
         for (p = SCREW_POSTS) {
             yy = p[1] / cos(slope);
             translate([p[0], yy, -0.1]) cylinder(h = TOP_T + 0.2, r = SCREW_CLEAR_R);

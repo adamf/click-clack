@@ -31,8 +31,9 @@ If you want everything in 2 days and don't care about a few dollars:
 
 | Qty | Item | Notes |
 |---|---|---|
-| 7 (or a 10-pack) | Cherry MX switches | Pick your feel: **MX Brown** = tactile/quiet (recommended for a chess clock at a tournament), **MX Blue** = clicky/loud, **MX Red** = linear |
-| 7 | DSA or XDA profile blank keycaps | Uniform-profile keycaps look most like Chronos buttons. Get 2 in a contrasting color for the player paddles, 1 small or contrasting for the center reset |
+| 3 (or a 10-pack) | Cherry MX switches | Pick your feel: **MX Brown** = tactile/quiet (recommended for a chess clock at a tournament), **MX Blue** = clicky/loud, **MX Red** = linear |
+| 2 | Large round keycaps for the clock buttons | To mimic the big round Chronos buttons. Big-knob / arcade-style 1u caps or jumbo round caps both work; a contrasting colour each side is classic. |
+| 1 | Red keycap for the center button | The Chronos's red center button. A red DSA/XDA 1u cap is fine. |
 
 **Estimate: ~$15–25** depending on brand. NovelKeys and KBDfans sell singles; Amazon sells 10-packs of generic-brand "MX-style" switches (Gateron, Outemu) for ~$10 which work fine for this.
 
