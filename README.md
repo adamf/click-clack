@@ -16,6 +16,7 @@ click-clack/
 └── case/
     ├── click-clack.scad  Parametric OpenSCAD case
     ├── render-preview.png Assembled render
+    ├── fitcheck.png      Interior component fit check
     └── stl/              Ready-to-slice meshes (STL + Bambu 3MF)
 ```
 
@@ -149,9 +150,14 @@ alone. Generic modules vary between sellers, so the relevant sizes are
   a strap or double-sided foam tape. Wiring passes front-to-back through the
   notch in the ridge rib.
 
-Rough interior plan: battery front-left, DevKitC front-right (under the screen
-overhang), TP4056 at the back wall, OLED boards hanging off the display panel.
-Dry-fit before final assembly — at 80 mm deep it's snug.
+Rough interior plan: slim battery front-left (tucked under the left screen),
+DevKitC on the floor just behind the screen overhang, TP4056 at the back wall,
+OLED boards hanging off the display panel. Dry-fit before final assembly — at
+80 mm deep it's snug, and a fat 2000 mAh cell won't clear the screens.
+
+Render the fit check yourself with `part="fitcheck"`:
+
+![interior fit check](case/fitcheck.png)
 
 Regenerate the meshes after editing the `.scad`:
 
