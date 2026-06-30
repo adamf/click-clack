@@ -14,13 +14,9 @@ wins** and the schematic should be updated to match.
 | DS1 | OLED #1, 2.42" SSD1309 128×64 SPI (Player 1, left) |
 | DS2 | OLED #2, 2.42" SSD1309 128×64 SPI (Player 2, right) |
 | BT1 | 1S LiPo, 2000–3000 mAh, with built-in protection |
-| SW1 | Cherry MX — Player 1 (left paddle) |
-| SW2 | Cherry MX — Player 2 (right paddle) |
-| SW3 | Cherry MX — Mode |
-| SW4 | Cherry MX — Set |
-| SW5 | Cherry MX — Up |
-| SW6 | Cherry MX — Down |
-| SW7 | Cherry MX — Center / Reset / Pause |
+| SW1 | Cherry MX — left clock button |
+| SW2 | Cherry MX — right clock button |
+| SW3 | Cherry MX — center button (pause + settings combos) |
 | BZ1 | Passive piezo buzzer |
 | R1 | 100 kΩ — battery sense divider, top |
 | R2 | 100 kΩ — battery sense divider, bottom |
@@ -60,11 +56,9 @@ no external pull-up resistors needed.
 |---|---|---|
 | `BTN_P1`     | GPIO4  | SW1 |
 | `BTN_P2`     | GPIO5  | SW2 |
-| `BTN_MODE`   | GPIO6  | SW3 |
-| `BTN_SET`    | GPIO7  | SW4 |
-| `BTN_UP`     | GPIO15 | SW5 |
-| `BTN_DOWN`   | GPIO16 | SW6 |
-| `BTN_CENTER` | GPIO17 | SW7 |
+| `BTN_CENTER` | GPIO17 | SW3 |
+
+GPIO 6, 7, 15, 16 are unused now (free for future expansion).
 
 ## ESP32-S3 — output / sense
 
@@ -94,7 +88,7 @@ Max input ≈ 2.1 V at 4.2 V battery, well within ADC range.
 
 - DS1/DS2 RST is shared. If you ever see only one panel come up, split
   RST onto two GPIOs (e.g. GPIO14 and a free pin) and update firmware.
-- The center button doubles as pause (short press) and reset-to-loaded-TC
-  (long press, >1s). It has no special hardware — same MX switch as the
-  others, just a smaller keycap.
+- The center button does pause/resume (tap) and, held ~1s, opens SETUP;
+  inside SETUP the two clock buttons edit values. No special hardware —
+  same MX switch as the clock buttons, just a smaller (often red) keycap.
 - Avoid GPIO 0/3/45/46 (strapping), 19/20 (USB), 26–37 (flash/PSRAM).

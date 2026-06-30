@@ -42,13 +42,11 @@ SPI bus
 
 Buttons (all to GND, MCU uses internal pull-ups)
 ------------------------------------------------
-   GPIO4  ──[ MX P1 ]── GND      (left player paddle)
-   GPIO5  ──[ MX P2 ]── GND      (right player paddle)
-   GPIO6  ──[ MX MODE ]── GND
-   GPIO7  ──[ MX SET  ]── GND
-   GPIO15 ──[ MX UP   ]── GND
-   GPIO16 ──[ MX DOWN ]── GND
-   GPIO17 ──[ MX CENTER ]── GND  (small reset/pause)
+   GPIO4  ──[ MX P1 ]── GND      (left clock button)
+   GPIO5  ──[ MX P2 ]── GND      (right clock button)
+   GPIO17 ──[ MX CENTER ]── GND  (center button — pause + settings combos)
+
+   Just three buttons, Chronos-style. GPIO6/7/15/16 are now free.
 
 
 Buzzer
