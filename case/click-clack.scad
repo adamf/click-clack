@@ -1,266 +1,298 @@
 // click-clack — Chronos-style chess clock case
-// Parametric OpenSCAD. Two printed parts: lower shell + angled top plate.
+// Parametric OpenSCAD.
 //
-//   part = "bottom"  -> lower shell: battery bay, USB-C cutout, support
-//                       pillars and screw posts. Print floor-down.
-//   part = "top"     -> angled top plate, laid FLAT for printing.
-//                       Cosmetic face is on the bed; switch reliefs face up.
-//   part = "preview" -> both, assembled, for visual check (do not print).
-//   part = "plate"   -> both parts arranged flat on one build plate.
+// Shape follows a real Chronos: a steeply TILTED FRONT FACE holding the two
+// screens, and a FLAT TOP behind it holding the buttons. Three printed parts,
+// all printable flat / floor-down with no supports:
+//
+//   part = "shell"   -> lower body: floor, front lip, side walls (the Chronos
+//                       silhouette), back wall, ridge rib, screw bosses and
+//                       button support pillars. Print floor-down.
+//   part = "display" -> the tilted screen panel, laid FLAT for printing.
+//   part = "top"     -> the flat top button panel, laid FLAT for printing.
+//   part = "preview" -> all three assembled (do not print).
 //   part = "demo"    -> assembled with representative keycaps (visual only).
+//   part = "plate"   -> all three parts arranged flat on one build plate.
 //
-// ---------------------------------------------------------------------------
-// Printing on a Bambu Lab printer (X1 / X1C / P1S / P1P / A1)
-// ---------------------------------------------------------------------------
-// Build volume 256 x 256 x 256 mm. This case is 220 x 90 mm, so it fits with
-// room to spare. (The A1 *mini* at 180 x 180 is too small for the 220 mm
-// width — split the model or use a full-size machine.)
-//
-// Recommended Bambu Studio settings:
-//   * Filament  : PETG or PLA+ (PETG preferred — a chess clock gets slapped,
-//                 and PETG is tougher and more impact-resistant than plain PLA)
-//   * Layer     : 0.20 mm
-//   * Walls     : 4 perimeters (the top plate takes the button load)
-//   * Infill    : 20-30% gyroid
-//   * Supports  : NONE needed. The USB-C cutout is a short 10 mm bridge, the
-//                 switch reliefs open upward, and all posts are vertical.
-//   * Adhesion  : 5 mm brim on the bottom shell (220 mm of flat footprint can
-//                 lift at the corners without one).
-//   * Inserts   : M3 brass heat-set inserts in the screw posts; M3 screws
-//                 (8-10 mm) drop through the counterbores in the top plate.
-// ---------------------------------------------------------------------------
+// Print on a Bambu Lab printer (256^3 bed; this is 205 x 95 mm). PETG or PLA+,
+// 0.20 mm, 4 walls, 20-30% gyroid, 5 mm brim on the shell, no supports.
+// M3 heat-set inserts in the shell bosses; M3 screws through the panels.
 
-part = "preview";   // "bottom" | "top" | "preview" | "plate"
+part = "preview";
 
 $fn = 48;
 
-// ---------- main dimensions ----------
-W       = 220;   // overall width
-D       = 90;    // overall depth (front-to-back)
-H_back  = 55;    // height at the back (tall side of the wedge)
-H_front = 30;    // height at the front (short side)
-WALL    = 2.8;   // shell wall thickness
-TOP_T   = 4.0;   // top plate thickness (was 3.0 — thicker resists button load)
-FLOOR_T = 3.0;   // shell floor thickness
+// ---------- overall dimensions ----------
+// Sized to the classic Chronos: ~8.25" x 2.75" x 2.5" (210 x 70 x 63 mm) — a
+// shallow, fairly upright wedge with a steep screen face and a flat-top strip.
+W        = 210;   // width
+D        = 70;    // depth (front-to-back)
+FRONT_LIP = 10;   // height of the little vertical lip at the very front
+H_TOP    = 63;    // height of the flat top (and the back wall)
+Y_RIDGE  = 7;     // depth position of the ridge where the two faces meet
 
-// wedge slope (top face rises from front to back)
-slope   = atan((H_back - H_front) / D);
-D_slope = D / cos(slope);   // top-plate depth measured along the slope
+WALL     = 2.8;
+FLOOR_T  = 3.0;
+PANEL_T  = 4.0;   // thickness of the display / top panels
+LEDGE    = 2.0;   // (unused spacing reserved)
+CLEAR    = 0.3;   // panel fit clearance
 
-// ---------- top-plate seating ----------
-LID_CLEAR = 0.3;   // gap around the lid so it drops into the opening
-LEDGE_W   = 2.5;   // width of the perimeter ledge the top plate rests on
+// ---------- display panel geometry (the tilted face: B -> C) ----------
+B = [-D/2, FRONT_LIP];   // front-lip top
+C = [Y_RIDGE, H_TOP];    // ridge
+disp_dY  = C[0] - B[0];                 // run (depth)
+disp_dZ  = C[1] - B[1];                 // rise (height)
+disp_tilt = atan(disp_dZ / disp_dY);    // from horizontal
+disp_len  = sqrt(disp_dY*disp_dY + disp_dZ*disp_dZ);
+disp_midY = (B[0] + C[0]) / 2;
+disp_midZ = (B[1] + C[1]) / 2;
 
-// ---------- OLED window ----------
-// 2.42" SSD1309 active area is ~55.0 x 27.5 mm. Module PCB ~65 x 38 mm.
-OLED_W      = 56;
-OLED_H      = 28;
-OLED_GAP_FROM_CENTER = 38;  // case centerline to inner edge of each OLED
-OLED_Y_OFFSET = -6;         // displays sit front-and-centre (world Y)
+// ---------- flat top geometry (C -> E) ----------
+top_depth = D/2 - Y_RIDGE;     // depth of the flat top strip
+top_midY  = (Y_RIDGE + D/2) / 2;
 
-// ---------- MX switch cutout ----------
-// Cherry MX plate mount: 14.0 x 14.0 mm square hole in a 1.5 mm plate.
-// The plate here is thicker, so the underside is relieved to leave a 1.5 mm
-// land the switch clips grab onto.
-MX          = 14.0;   // plate hole
-MX_PLATE_T  = 1.5;    // land thickness the clips snap against
-MX_RELIEF   = 16.0;   // underside relief so the clips can flex
+// ---------- OLED windows (on the display panel) ----------
+OLED_W = 56;
+OLED_H = 28;
+OLED_GAP_FROM_CENTER = 38;   // centerline to inner edge of each window
+OLED_SLOPE_OFFSET = 0;       // shift up/down the slope (panel-local y')
 
-// Switch layout — Chronos style: just three buttons. The two clock buttons
-// sit diagonally (left toward the back, right toward the front) for big round
-// keycaps; one center button drives every setting via press-and-hold combos.
-P1_POS     = [-66,  26];   // left clock button  (back-left)
-P2_POS     = [ 66, -30];   // right clock button (front-right)
-CENTER_POS = [  0,  26];   // single center button (the "red square")
-SWITCHES   = [P1_POS, P2_POS, CENTER_POS];
+// ---------- MX switch cutouts (on the flat top panel) ----------
+MX         = 14.0;
+MX_PLATE_T = 1.5;
+MX_RELIEF  = 16.0;
 
-// ---------- USB-C cutout (lower back wall) ----------
+// Button positions on the flat top, panel-local [x, y] (y measured from the
+// flat-top centre; +y toward the back). Slight Chronos diagonal.
+BTN_L = [-60,  4];    // left clock button  (toward back)
+BTN_R = [ 60, -4];    // right clock button (toward front)
+BTN_C = [  0,  0];    // center button (the red one)
+BUTTONS = [BTN_L, BTN_R, BTN_C];
+
+// ---------- USB-C cutout (low on the back wall) ----------
 USBC_W = 10;
 USBC_H = 4;
-USBC_Z = 8;    // height above floor — low on the back, by the charge board
+USBC_Z = 8;
 
-// ---------- posts ----------
-// Screw posts take a heat-set insert and a screw from the top plate.
-// Support pillars just back up the plate under the load (no screw) — these sit
-// right behind each clock button so a hard press transfers straight to the
-// floor instead of flexing the plate.
-POST_R   = 4.5;
-INSERT_R = 2.0;    // M3 heat-set insert (~4.0 mm hole)
-CX = W/2 - 6;      // post X at the corners
-CY = D/2 - 6;      // post Y at front/back edges
-SCREW_POSTS   = [[-CX,-CY], [CX,-CY], [-CX,CY], [CX,CY], [0,-CY], [0,CY]];
-SUPPORT_POSTS = [[-66, 38], [66, -38]];   // behind P1, in front of P2
+// ---------- screws / bosses ----------
+BOSS_R   = 4.5;
+INSERT_R = 2.0;
+SCREW_CLEAR_R = 1.8;
+CBORE_R  = 3.2;
+CBORE_D  = 2.4;
 
-// top-plate screw holes
-SCREW_CLEAR_R = 1.8;   // M3 clearance
-CBORE_R       = 3.2;   // counterbore for the screw head
-CBORE_D       = 2.4;
+// display-panel screw positions, panel-local [x, y'] (y' along the slope)
+DISP_SCREWS = [[-(W/2-9), -(disp_len/2-8)], [ (W/2-9), -(disp_len/2-8)],
+               [-(W/2-9),  (disp_len/2-8)], [ (W/2-9),  (disp_len/2-8)]];
+// top-panel screw positions, panel-local [x, y]
+TOP_SCREWS  = [[-(W/2-9), -(top_depth/2-6)], [ (W/2-9), -(top_depth/2-6)],
+               [-(W/2-9),  (top_depth/2-6)], [ (W/2-9),  (top_depth/2-6)]];
 
 // ============================================================
-// primitives
+// body silhouette
 // ============================================================
-module wedge_solid() {
-    polyhedron(
-        points = [
-            [-W/2, -D/2, 0], [ W/2, -D/2, 0], [ W/2,  D/2, 0], [-W/2,  D/2, 0],
-            [-W/2, -D/2, H_front], [ W/2, -D/2, H_front],
-            [ W/2,  D/2, H_back],  [-W/2,  D/2, H_back],
-        ],
-        faces = [
-            [0,1,2,3], [4,5,1,0], [6,2,1,5], [7,3,2,6], [4,0,3,7], [7,6,5,4],
-        ]
-    );
+profile = [[-D/2, 0], [D/2, 0], [D/2, H_TOP], [Y_RIDGE, H_TOP], [-D/2, FRONT_LIP]];
+
+// solid Chronos body: profile is (depth, height); extrude across the width
+module body_solid() {
+    translate([-W/2, 0, 0])
+        multmatrix([[0,0,1,0],[1,0,0,0],[0,1,0,0],[0,0,0,1]])
+            linear_extrude(W) polygon(profile);
 }
 
-// Place children in the top-plate plane: z'=0 lies on the sloped top face,
-// x' runs across the width, y' runs up the slope, z' is the outward normal.
-module on_top_plane() {
-    translate([0, 0, (H_front + H_back) / 2])
-        rotate([slope, 0, 0])
+// place children on the tilted display face: x' across width, y' up the slope,
+// z' = 0 on the outer face, +z' outward.
+module on_display() {
+    translate([0, disp_midY, disp_midZ])
+        rotate([disp_tilt, 0, 0])
             children();
 }
 
-// Everything at or below the underside of the top plate (used to clip posts).
-module below_lid() {
-    on_top_plane()
-        translate([0, 0, -TOP_T - 500])
-            cube([2000, 2000, 1000], center = true);
+// place children on the flat top: x across width, y depth-from-top-centre,
+// z = 0 on the outer (top) surface, +z up.
+module on_top() {
+    translate([0, top_midY, H_TOP])
+        children();
 }
 
 // ============================================================
-// bottom shell
+// panels — flat for printing (z = 0 cosmetic/bed face)
 // ============================================================
-module post(p) {
-    intersection() {
-        translate([p[0], p[1], 0]) cylinder(h = H_back + 10, r = POST_R);
-        below_lid();
-        wedge_solid();
+module oled_window(sx) {
+    cx = sx * (OLED_GAP_FROM_CENTER + OLED_W/2);
+    translate([cx - OLED_W/2, OLED_SLOPE_OFFSET - OLED_H/2, -1])
+        cube([OLED_W, OLED_H, PANEL_T + 2]);
+}
+
+module mx_cut(pos) {
+    translate([pos[0], pos[1], 0]) {
+        translate([-MX/2, -MX/2, -1]) cube([MX, MX, PANEL_T + 2]);
+        translate([-MX_RELIEF/2, -MX_RELIEF/2, MX_PLATE_T])
+            cube([MX_RELIEF, MX_RELIEF, PANEL_T]);
     }
 }
 
-module bottom() {
+module screw_hole(pos) {
+    translate([pos[0], pos[1], -1]) cylinder(h = PANEL_T + 2, r = SCREW_CLEAR_R);
+    translate([pos[0], pos[1], -0.01]) cylinder(h = CBORE_D, r = CBORE_R);
+}
+
+module display_panel_flat() {
+    w = W - 2*CLEAR;
+    l = disp_len - 2*CLEAR;
+    difference() {
+        translate([-w/2, -l/2, 0]) cube([w, l, PANEL_T]);
+        oled_window(-1); oled_window(1);
+        for (s = DISP_SCREWS) screw_hole(s);
+    }
+}
+
+module top_panel_flat() {
+    w = W - 2*CLEAR;
+    l = top_depth - 2*CLEAR;
+    difference() {
+        translate([-w/2, -l/2, 0]) cube([w, l, PANEL_T]);
+        for (b = BUTTONS) mx_cut(b);
+        for (s = TOP_SCREWS) screw_hole(s);
+    }
+}
+
+// panels placed in the assembly (cosmetic face outward, flush with the
+// silhouette; mirror puts the flat part's z=0 cosmetic face at z'=0)
+module display_panel_placed() {
+    on_display() mirror([0,0,1]) display_panel_flat();
+}
+module top_panel_placed() {
+    on_top() mirror([0,0,1]) top_panel_flat();
+}
+
+// grown panel solids, used to carve the seats the panels drop into
+module display_seat() {
+    on_display() translate([0, 0, -PANEL_T])
+        linear_extrude(PANEL_T + 6)
+            offset(CLEAR) square([W, disp_len], center = true);
+}
+module top_seat() {
+    on_top() translate([0, 0, -PANEL_T])
+        linear_extrude(PANEL_T + 6)
+            offset(CLEAR) square([W, top_depth], center = true);
+}
+
+// ============================================================
+// shell internals: bosses, pillars, ridge rib
+// ============================================================
+// everything below the display-panel underside (to clip display bosses)
+module below_display() {
+    on_display() translate([0, 0, -PANEL_T - 400]) cube([1200, 1200, 800], center = true);
+}
+
+module disp_boss(pos) {
+    intersection() {
+        on_display() translate([pos[0], pos[1], -PANEL_T - 60]) cylinder(h = 80, r = BOSS_R);
+        body_solid();
+    }
+}
+module disp_insert(pos) {
+    on_display() translate([pos[0], pos[1], -PANEL_T - 30]) cylinder(h = 30 - 5, r = INSERT_R);
+}
+
+module top_boss(pos) {
+    intersection() {
+        translate([pos[0], top_midY + pos[1], 0]) cylinder(h = H_TOP - PANEL_T, r = BOSS_R);
+        body_solid();
+    }
+}
+module top_insert(pos) {
+    translate([pos[0], top_midY + pos[1], H_TOP - PANEL_T - 14])
+        cylinder(h = 14 + 1, r = INSERT_R);
+}
+
+// support pillars right under the flat-top buttons (back the press load)
+module button_pillar(b) {
+    intersection() {
+        translate([b[0], top_midY + b[1], 0]) cylinder(h = H_TOP - PANEL_T, r = BOSS_R);
+        body_solid();
+    }
+}
+
+// transverse rib under the ridge, supports both panel edges; notch for wiring
+module ridge_rib() {
+    difference() {
+        intersection() {
+            translate([0, Y_RIDGE, 0])
+                translate([-(W/2 - WALL), -WALL/2, 0]) cube([W - 2*WALL, WALL, H_TOP]);
+            body_solid();
+        }
+        translate([-25, Y_RIDGE - WALL, FLOOR_T]) cube([50, 3*WALL, 22]);  // wiring notch
+    }
+}
+
+// ============================================================
+// shell
+// ============================================================
+module shell() {
     difference() {
         union() {
-            // Hollow wedge shell with a stepped opening: the lower cavity is
-            // inset by WALL+LEDGE_W, but the top TOP_T (the lid pocket) is inset
-            // by only WALL. The step between them is a continuous ledge, TOP_T
-            // below the rim, that carries the whole perimeter of the top plate.
+            // walls = body minus the big interior cavity (open top)
             difference() {
-                wedge_solid();
-                // lower cavity (forms the ledge shelf at its top)
-                translate([0, 0, FLOOR_T])
-                    linear_extrude(H_back + 20)
-                        offset(r = -(WALL + LEDGE_W))
-                            square([W, D], center = true);
-                // lid pocket: open the top TOP_T to lid size, following the slope
-                on_top_plane()
-                    translate([0, 0, -TOP_T])
-                        linear_extrude(TOP_T + 50)
-                            offset(r = -WALL)
-                                square([W, D_slope], center = true);
+                body_solid();
+                // interior: inset by WALL on front/back/sides, open from floor up
+                translate([-(W/2 - WALL), -(D/2 - WALL), FLOOR_T])
+                    cube([W - 2*WALL, D - 2*WALL, H_TOP + 60]);
             }
-            for (p = SCREW_POSTS)   post(p);
-            for (p = SUPPORT_POSTS) post(p);
+            ridge_rib();
+            for (s = DISP_SCREWS) disp_boss(s);
+            for (s = TOP_SCREWS)  top_boss(s);
+            for (b = BUTTONS)     button_pillar(b);
         }
-        // USB-C cutout in the back wall
-        translate([-USBC_W/2, D/2 - WALL - LEDGE_W - 0.1, USBC_Z])
-            cube([USBC_W, WALL + LEDGE_W + 0.3, USBC_H]);
-        // heat-set insert holes (screw posts only), drilled from the top
-        for (p = SCREW_POSTS)
-            translate([p[0], p[1], FLOOR_T + 1.5])
-                cylinder(h = H_back + 20, r = INSERT_R);
+        // seats for the two panels (carve the top PANEL_T off the wall edges)
+        display_seat();
+        top_seat();
+        // insert holes
+        for (s = DISP_SCREWS) disp_insert(s);
+        for (s = TOP_SCREWS)  top_insert(s);
+        // USB-C, low on the back wall
+        translate([-USBC_W/2, D/2 - WALL - 0.1, USBC_Z]) cube([USBC_W, WALL + 0.3, USBC_H]);
     }
 }
 
 // ============================================================
-// top plate (printed flat: cosmetic face on the bed at z = 0)
+// keycaps — visual only (part = "demo")
 // ============================================================
-module mx_hole(x, y) {
-    yy = y / cos(slope);   // world Y -> slope-frame Y
-    translate([x, yy, 0]) {
-        // through hole for the switch body
-        translate([-MX/2, -MX/2, -0.1])
-            cube([MX, MX, TOP_T + 0.2]);
-        // underside relief, leaving a 1.5 mm clip land at the cosmetic face
-        translate([-MX_RELIEF/2, -MX_RELIEF/2, MX_PLATE_T])
-            cube([MX_RELIEF, MX_RELIEF, TOP_T]);
-    }
-}
-
-module oled_hole(sx) {
-    cx = sx * (OLED_GAP_FROM_CENTER + OLED_W/2);
-    cy = OLED_Y_OFFSET / cos(slope);
-    translate([cx - OLED_W/2, cy - OLED_H/2, -0.1])
-        cube([OLED_W, OLED_H, TOP_T + 0.2]);
-}
-
-module top_plate_flat() {
-    lw = W - 2*WALL - 2*LID_CLEAR;
-    ld = D_slope - 2*WALL - 2*LID_CLEAR;
-    difference() {
-        translate([-lw/2, -ld/2, 0]) cube([lw, ld, TOP_T]);
-        oled_hole(-1); oled_hole(1);
-        for (s = SWITCHES) mx_hole(s[0], s[1]);
-        for (p = SCREW_POSTS) {
-            yy = p[1] / cos(slope);
-            translate([p[0], yy, -0.1]) cylinder(h = TOP_T + 0.2, r = SCREW_CLEAR_R);
-            translate([p[0], yy, -0.1]) cylinder(h = CBORE_D + 0.1, r = CBORE_R);
+module cap_round(b, d, h, col) {
+    color(col) on_top() translate([b[0], b[1], 0])
+        union() {
+            cylinder(d1 = d, d2 = d - 1.5, h = h, $fn = 60);
+            translate([0,0,h]) scale([1,1,0.22]) sphere(d = d - 1.5, $fn = 60);
         }
-    }
 }
-
-module top_plate_placed() {
-    on_top_plane()
-        mirror([0, 0, 1])   // cosmetic face outward, reliefs facing into the case
-            top_plate_flat();
-}
-
-// ============================================================
-// keycaps — visualisation only (part = "demo"), never printed
-// ============================================================
-// Big round caps on the clock buttons (Chronos-style), a red cap on center.
-module cap_round(pos, d, h, col) {
-    color(col)
-        on_top_plane()
-            translate([pos[0], pos[1] / cos(slope), 0])
-                union() {
-                    cylinder(d1 = d, d2 = d - 1.5, h = h, $fn = 60);
-                    translate([0, 0, h]) scale([1, 1, 0.22]) sphere(d = d - 1.5, $fn = 60);
-                }
-}
-module cap_square(pos, w, h, col) {
-    color(col)
-        on_top_plane()
-            translate([pos[0], pos[1] / cos(slope), 0])
-                linear_extrude(h) offset(r = 2) square([w - 4, w - 4], center = true);
-}
-module mx_top(pos) {   // hint of the black MX switch housing under the cap
-    color("#1b1b1b")
-        on_top_plane()
-            translate([pos[0], pos[1] / cos(slope), 0])
-                translate([-7.8, -7.8, 0]) cube([15.6, 15.6, 1.2]);
+module cap_square(b, w, h, col) {
+    color(col) on_top() translate([b[0], b[1], 0])
+        linear_extrude(h) offset(2) square([w-4, w-4], center = true);
 }
 
 // ============================================================
 // render
 // ============================================================
-if (part == "bottom") {
-    bottom();
+if (part == "shell") {
+    shell();
+} else if (part == "display") {
+    display_panel_flat();
 } else if (part == "top") {
-    top_plate_flat();
+    top_panel_flat();
 } else if (part == "plate") {
-    // both parts flat on one build plate
-    translate([0, -D/2 - 5, 0]) bottom();
-    translate([0,  D_slope/2 + 5, 0]) top_plate_flat();
+    translate([0, -D/2 - 5, 0]) shell();
+    translate([0,  D/2 + disp_len/2 + 8, 0]) display_panel_flat();
+    translate([0,  D/2 + disp_len + top_depth/2 + 16, 0]) top_panel_flat();
 } else if (part == "demo") {
-    // assembled, with representative keycaps fitted (not a printable part)
-    color("DimGray")   bottom();
-    color("Gainsboro") top_plate_placed();
-    for (s = SWITCHES) mx_top(s);
-    cap_round(P1_POS, 24, 9, "Silver");
-    cap_round(P2_POS, 24, 9, "Silver");
-    cap_square(CENTER_POS, 15, 7, "Crimson");
+    color("DimGray")   shell();
+    color("Gainsboro") display_panel_placed();
+    color("Gainsboro") top_panel_placed();
+    cap_round(BTN_L, 24, 9, "Silver");
+    cap_round(BTN_R, 24, 9, "Silver");
+    cap_square(BTN_C, 15, 7, "Crimson");
 } else {
-    color("DimGray")  bottom();
-    color("Gainsboro") top_plate_placed();
+    color("DimGray")   shell();
+    color("Gainsboro") display_panel_placed();
+    color("Silver")    top_panel_placed();
 }
