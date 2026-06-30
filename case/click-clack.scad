@@ -23,10 +23,10 @@ part = "preview";
 $fn = 48;
 
 // ---------- overall dimensions ----------
-// Sized to the classic Chronos: ~8.25" x 2.75" x 2.5" (210 x 70 x 63 mm) — a
-// shallow, fairly upright wedge with a steep screen face and a flat-top strip.
+// Close to the classic Chronos (~8.25" x 2.75" x 2.5"); the depth is opened up
+// a little past the original 70 mm to give the boards and battery room inside.
 W        = 210;   // width
-D        = 70;    // depth (front-to-back)
+D        = 80;    // depth (front-to-back)
 FRONT_LIP = 10;   // height of the little vertical lip at the very front
 H_TOP    = 63;    // height of the flat top (and the back wall)
 Y_RIDGE  = 7;     // depth position of the ridge where the two faces meet

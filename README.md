@@ -42,8 +42,9 @@ pio device monitor
 ## Case / 3D printing (Bambu Lab)
 
 The case copies the classic **Chronos** shape — a steep, tilted **screen
-face** and a flat **top** for the buttons — sized to the real thing
-(~210 × 70 × 63 mm). It's three printed parts: a lower **shell** that carries
+face** and a flat **top** for the buttons — close to the real thing
+(~210 × 80 × 63 mm; the depth is opened up a touch past the original 70 mm for
+easier assembly). It's three printed parts: a lower **shell** that carries
 the Chronos silhouette, a flat **display panel** that the OLEDs mount behind,
 and a flat **top panel** that the switches mount into. Ready-to-slice meshes
 are in `case/stl/` (STL + Bambu Studio's native 3MF); the source of truth is
@@ -51,9 +52,9 @@ the parametric `case/click-clack.scad`.
 
 | Part | File | Size | Print orientation |
 |---|---|---|---|
-| Shell         | `click-clack-shell.{stl,3mf}`   | 210 × 70 × 59 mm | floor on the bed |
-| Display panel | `click-clack-display.{stl,3mf}` | 209 × 67 × 4 mm  | flat, screen face on the bed |
-| Top panel     | `click-clack-top.{stl,3mf}`     | 209 × 27 × 4 mm  | flat, top face on the bed |
+| Shell         | `click-clack-shell.{stl,3mf}`   | 210 × 80 × 59 mm | floor on the bed |
+| Display panel | `click-clack-display.{stl,3mf}` | 209 × 70 × 4 mm  | flat, screen face on the bed |
+| Top panel     | `click-clack-top.{stl,3mf}`     | 209 × 32 × 4 mm  | flat, top face on the bed |
 
 All three parts fit a 256 × 256 mm Bambu bed (X1 / X1C / P1S / P1P / A1) and
 print flat / floor-down with **no supports** — the two faces are separate flat
