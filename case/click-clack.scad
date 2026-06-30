@@ -6,15 +6,16 @@
 // all printable flat / floor-down with no supports:
 //
 //   part = "shell"   -> lower body: floor, front lip, side walls (the Chronos
-//                       silhouette), back wall, ridge rib, screw bosses and
-//                       button support pillars. Print floor-down.
+//                       silhouette), back wall, ridge rib, screw bosses and the
+//                       component mounts. Print floor-down.
 //   part = "display" -> the tilted screen panel, laid FLAT for printing.
 //   part = "top"     -> the flat top button panel, laid FLAT for printing.
 //   part = "preview" -> all three assembled (do not print).
 //   part = "demo"    -> assembled with representative keycaps (visual only).
+//   part = "fitcheck"-> assembly ghosted with component footprints inside.
 //   part = "plate"   -> all three parts arranged flat on one build plate.
 //
-// Print on a Bambu Lab printer (256^3 bed; this is 205 x 95 mm). PETG or PLA+,
+// Print on a Bambu Lab printer (256^3 bed; this is 210 x 80 mm). PETG or PLA+,
 // 0.20 mm, 4 walls, 20-30% gyroid, 5 mm brim on the shell, no supports.
 // M3 heat-set inserts in the shell bosses; M3 screws through the panels.
 
@@ -26,7 +27,8 @@ $fn = 48;
 // Close to the classic Chronos (~8.25" x 2.75" x 2.5"); the depth is opened up
 // a little past the original 70 mm to give the boards and battery room inside.
 W        = 210;   // width
-D        = 80;    // depth (front-to-back)
+D        = 80;    // depth (front-to-back) — compact; the DevKitC tucks behind
+                  //   the screen overhang (see the fit-check, part="fitcheck")
 FRONT_LIP = 10;   // height of the little vertical lip at the very front
 H_TOP    = 63;    // height of the flat top (and the back wall)
 Y_RIDGE  = 7;     // depth position of the ridge where the two faces meet
@@ -71,7 +73,7 @@ BUTTONS = [BTN_L, BTN_R, BTN_C];
 
 // ---------- USB-C cutout (low on the back wall) ----------
 // Aligned to a TP4056 board lying flat on 2 mm stand-offs (socket ~6 mm up).
-// Off-centre so it clears the centre-button support pillar.
+// Off-centre so the board clears the centre button / its wiring.
 USBC_W = 11;
 USBC_H = 6;
 USBC_Z = 3.5;
@@ -90,19 +92,20 @@ OLED_PCB_H    = 41;    // module board height
 OLED_ACT_OFF  = 0;     // active-area offset from board centre, up the slope (y')
 OLED_HOLE_DX  = 60;    // mounting-hole spacing across the board
 OLED_HOLE_DY  = 35;    // mounting-hole spacing up/down the board
-OLED_STAND_H  = 4.0;   // stand-off height (board sits this far off the panel)
+OLED_STAND_H  = 3.0;   // stand-off height (board sits this far off the panel)
 OLED_PILOT_R  = 0.8;   // M2 self-tapping pilot hole
 
-// ESP32-S3-DevKitC-1 — front-right floor (under the screen overhang)
-DEVKIT_L = 70; DEVKIT_W = 26; DEVKIT_CL = 0.8; DEVKIT_STAND = 4;
-DEVKIT_POS = [40, -10];
+// ESP32-S3-DevKitC-1 — on the floor just behind the screen overhang
+DEVKIT_L = 70; DEVKIT_W = 26; DEVKIT_CL = 0.8; DEVKIT_STAND = 3;
+DEVKIT_POS = [32, 21];
 
 // TP4056 USB-C charger board (USB-C on a short edge) — at the back wall cutout
 TP_L = 27; TP_W = 18; TP_CL = 0.6; TP_STAND = 2;
 
-// 1S LiPo (≈2000 mAh) — front-left floor
-BATT_L = 60; BATT_W = 36; BATT_H = 12; BATT_CL = 1.0;
-BATT_POS = [-48, -10];
+// 1S LiPo — front-left floor, tucked UNDER the left screen, so a slim cell is
+// what fits the height. Default ≈ a 753448 (~1500 mAh, 7.5 x 34 x 48 mm).
+BATT_L = 48; BATT_W = 34; BATT_H = 7; BATT_CL = 1.0;
+BATT_POS = [-52, -14];
 
 // ---------- screws / bosses ----------
 BOSS_R   = 4.5;
@@ -260,14 +263,6 @@ module top_insert(pos) {
         cylinder(h = 14 + 1, r = INSERT_R);
 }
 
-// support pillars right under the flat-top buttons (back the press load)
-module button_pillar(b) {
-    intersection() {
-        translate([b[0], top_midY + b[1], 0]) cylinder(h = H_TOP - PANEL_T, r = BOSS_R);
-        body_solid();
-    }
-}
-
 // transverse rib under the ridge, supports both panel edges; notch for wiring
 module ridge_rib() {
     difference() {
@@ -338,7 +333,6 @@ module shell() {
             ridge_rib();
             for (s = DISP_SCREWS) disp_boss(s);
             for (s = TOP_SCREWS)  top_boss(s);
-            for (b = BUTTONS)     button_pillar(b);
             devkit_cradle();
             battery_bay();
             tp4056_holder();
@@ -371,6 +365,28 @@ module cap_square(b, w, h, col) {
 }
 
 // ============================================================
+// component ghosts — visual fit check only (part = "fitcheck")
+// ============================================================
+module oled_ghost(sx) {
+    cx = sx * (OLED_GAP_FROM_CENTER + OLED_W/2);
+    cy = OLED_SLOPE_OFFSET - OLED_ACT_OFF;
+    on_display() translate([cx, cy, -(PANEL_T + OLED_STAND_H + 3)])
+        cube([OLED_PCB_W, OLED_PCB_H, 6], center = true);
+}
+module devkit_ghost() {
+    translate([DEVKIT_POS[0], DEVKIT_POS[1], FLOOR_T + DEVKIT_STAND + 6.5])
+        cube([DEVKIT_L, DEVKIT_W, 13], center = true);   // board + tallest parts
+}
+module tp_ghost() {
+    cy = D/2 - WALL - TP_L/2;
+    translate([USBC_X, cy, FLOOR_T + TP_STAND + 2]) cube([TP_W, TP_L, 4], center = true);
+}
+module batt_ghost() {
+    translate([BATT_POS[0], BATT_POS[1], FLOOR_T + BATT_H/2])
+        cube([BATT_L, BATT_W, BATT_H], center = true);
+}
+
+// ============================================================
 // render
 // ============================================================
 if (part == "shell") {
@@ -383,6 +399,15 @@ if (part == "shell") {
     translate([0, -D/2 - 5, 0]) shell();
     translate([0,  D/2 + disp_len/2 + 8, 0]) display_panel_flat();
     translate([0,  D/2 + disp_len + top_depth/2 + 16, 0]) top_panel_flat();
+} else if (part == "fitcheck") {
+    // shell + panels ghosted (%), components solid, to eyeball clearances
+    %shell();
+    %display_panel_placed();
+    %top_panel_placed();
+    color("ForestGreen") { oled_ghost(-1); oled_ghost(1); }
+    color("SteelBlue")   devkit_ghost();
+    color("Orange")      tp_ghost();
+    color("Crimson")     batt_ghost();
 } else if (part == "demo") {
     color("DimGray")   shell();
     color("Gainsboro") display_panel_placed();

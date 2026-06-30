@@ -109,8 +109,10 @@ Players hammer these buttons, so the top panel is engineered for it:
 - 4 mm panels seated in a recess around their whole perimeter — no corner-only
   span.
 - M3 screw bosses at every panel corner clamp the panels down.
-- Support **pillars** rise from the floor right under the two clock buttons, so
-  a hard press transfers straight into the shell instead of flexing the panel.
+- The button panel is a short ~33 mm-deep strip carried on all four edges
+  (ridge rib at the front, back wall at the back, side walls left/right), so a
+  thumb on a button barely flexes it — no floor pillars needed, which also
+  keeps the floor clear for the boards.
 - A transverse **ridge rib** (with a wiring notch) backs the seam where the two
   faces meet.
 - Each MX cutout has a proper 1.5 mm clip land with an underside relief, so the
