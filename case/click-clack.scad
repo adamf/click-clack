@@ -70,9 +70,39 @@ BTN_C = [  0,  0];    // center button (the red one)
 BUTTONS = [BTN_L, BTN_R, BTN_C];
 
 // ---------- USB-C cutout (low on the back wall) ----------
-USBC_W = 10;
-USBC_H = 4;
-USBC_Z = 8;
+// Aligned to a TP4056 board lying flat on 2 mm stand-offs (socket ~6 mm up).
+// Off-centre so it clears the centre-button support pillar.
+USBC_W = 11;
+USBC_H = 6;
+USBC_Z = 3.5;
+USBC_X = -30;
+
+// ============================================================
+// internal component mounts
+// ------------------------------------------------------------
+// NB: generic modules vary between sellers. These are typical values for the
+// common Waveshare / lcdwiki-style parts — MEASURE YOUR OWN and tweak. Every
+// mount locates its part; nothing here is glued-in-place only.
+// ============================================================
+// 2.42" SSD1309 OLED module (one per screen)
+OLED_PCB_W    = 65;    // module board width
+OLED_PCB_H    = 41;    // module board height
+OLED_ACT_OFF  = 0;     // active-area offset from board centre, up the slope (y')
+OLED_HOLE_DX  = 60;    // mounting-hole spacing across the board
+OLED_HOLE_DY  = 35;    // mounting-hole spacing up/down the board
+OLED_STAND_H  = 4.0;   // stand-off height (board sits this far off the panel)
+OLED_PILOT_R  = 0.8;   // M2 self-tapping pilot hole
+
+// ESP32-S3-DevKitC-1 — front-right floor (under the screen overhang)
+DEVKIT_L = 70; DEVKIT_W = 26; DEVKIT_CL = 0.8; DEVKIT_STAND = 4;
+DEVKIT_POS = [40, -10];
+
+// TP4056 USB-C charger board (USB-C on a short edge) — at the back wall cutout
+TP_L = 27; TP_W = 18; TP_CL = 0.6; TP_STAND = 2;
+
+// 1S LiPo (≈2000 mAh) — front-left floor
+BATT_L = 60; BATT_W = 36; BATT_H = 12; BATT_CL = 1.0;
+BATT_POS = [-48, -10];
 
 // ---------- screws / bosses ----------
 BOSS_R   = 4.5;
@@ -137,13 +167,36 @@ module screw_hole(pos) {
     translate([pos[0], pos[1], -0.01]) cylinder(h = CBORE_D, r = CBORE_R);
 }
 
+// OLED retention on the back of the display panel: 4 stand-off posts at the
+// module's hole pattern (board drops over them, M2 self-tappers clamp it) plus
+// low corner nibs that locate the board outline.
+module oled_mount(sx) {
+    cx = sx * (OLED_GAP_FROM_CENTER + OLED_W/2);
+    cy = OLED_SLOPE_OFFSET - OLED_ACT_OFF;
+    translate([cx, cy, PANEL_T]) {
+        for (hx = [-1, 1], hy = [-1, 1])
+            translate([hx*OLED_HOLE_DX/2, hy*OLED_HOLE_DY/2, 0])
+                difference() {
+                    cylinder(h = OLED_STAND_H, r = 2.3);
+                    translate([0,0,-0.1]) cylinder(h = OLED_STAND_H + 0.2, r = OLED_PILOT_R);
+                }
+        // locating nibs at the board corners
+        for (nx = [-1, 1], ny = [-1, 1])
+            translate([nx*(OLED_PCB_W/2 + 0.6), ny*(OLED_PCB_H/2 + 0.6), 0])
+                cylinder(h = 2.0, r = 1.6);
+    }
+}
+
 module display_panel_flat() {
     w = W - 2*CLEAR;
     l = disp_len - 2*CLEAR;
-    difference() {
-        translate([-w/2, -l/2, 0]) cube([w, l, PANEL_T]);
-        oled_window(-1); oled_window(1);
-        for (s = DISP_SCREWS) screw_hole(s);
+    union() {
+        difference() {
+            translate([-w/2, -l/2, 0]) cube([w, l, PANEL_T]);
+            oled_window(-1); oled_window(1);
+            for (s = DISP_SCREWS) screw_hole(s);
+        }
+        oled_mount(-1); oled_mount(1);
     }
 }
 
@@ -227,6 +280,48 @@ module ridge_rib() {
     }
 }
 
+// ---- floor / back-wall component mounts ----
+// open rectangular guide frame, centred at p, that a board/battery drops into
+module guide_frame(p, l, w, h, wall_t = 2) {
+    translate([p[0], p[1], FLOOR_T])
+        linear_extrude(h)
+            difference() {
+                square([l + 2*wall_t, w + 2*wall_t], center = true);
+                square([l, w], center = true);
+            }
+}
+
+module devkit_cradle() {
+    l = DEVKIT_L + 2*DEVKIT_CL; w = DEVKIT_W + 2*DEVKIT_CL;
+    guide_frame(DEVKIT_POS, l, w, DEVKIT_STAND + 3);
+    // corner stand-offs the board rests on (keeps its pins clear of the floor)
+    translate([DEVKIT_POS[0], DEVKIT_POS[1], FLOOR_T])
+        for (sx = [-1,1], sy = [-1,1])
+            translate([sx*(DEVKIT_L/2 - 3), sy*(DEVKIT_W/2 - 3), 0])
+                cylinder(h = DEVKIT_STAND, r = 2.5);
+}
+
+module battery_bay() {
+    l = BATT_L + 2*BATT_CL; w = BATT_W + 2*BATT_CL;
+    guide_frame(BATT_POS, l, w, min(BATT_H, 10));   // walls; strap/tape holds it down
+}
+
+module tp4056_holder() {
+    l = TP_L + 2*TP_CL; w = TP_W + 2*TP_CL;
+    yb = D/2 - WALL;                       // inner back wall
+    cy = yb - TP_L/2;                      // back short edge sits at the wall
+    translate([USBC_X, cy, FLOOR_T]) {
+        for (sx = [-1,1], sy = [-1,1])     // stand-offs
+            translate([sx*(TP_W/2 - 2), sy*(TP_L/2 - 3), 0]) cylinder(h = TP_STAND, r = 2);
+        // U-shaped guide (sides + front stop, open toward the wall)
+        linear_extrude(TP_STAND + 4)
+            difference() {
+                square([w + 4, l + 2], center = true);
+                translate([0, 2, 0]) square([w, l], center = true);
+            }
+    }
+}
+
 // ============================================================
 // shell
 // ============================================================
@@ -244,6 +339,9 @@ module shell() {
             for (s = DISP_SCREWS) disp_boss(s);
             for (s = TOP_SCREWS)  top_boss(s);
             for (b = BUTTONS)     button_pillar(b);
+            devkit_cradle();
+            battery_bay();
+            tp4056_holder();
         }
         // seats for the two panels (carve the top PANEL_T off the wall edges)
         display_seat();
@@ -251,8 +349,9 @@ module shell() {
         // insert holes
         for (s = DISP_SCREWS) disp_insert(s);
         for (s = TOP_SCREWS)  top_insert(s);
-        // USB-C, low on the back wall
-        translate([-USBC_W/2, D/2 - WALL - 0.1, USBC_Z]) cube([USBC_W, WALL + 0.3, USBC_H]);
+        // USB-C, low on the back wall (offset to clear the centre pillar)
+        translate([USBC_X - USBC_W/2, D/2 - WALL - 0.1, USBC_Z])
+            cube([USBC_W, WALL + 0.3, USBC_H]);
     }
 }
 

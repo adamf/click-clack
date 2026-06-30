@@ -61,6 +61,12 @@ Ready-to-slice meshes live in `case/stl/` (STL + Bambu Studio 3MF). Either:
 - Or upload the STLs to **JLCPCB 3D Printing**, **PCBWay**, **Craftcloud**, or
   **Shapeways** — **~$25–40** in MJF or SLA
 
+**Fasteners for assembly** (a cheap M2/M3 assortment covers all of it):
+- 8 × **M2 self-tapping screws** (~6 mm) — mount the two OLED modules.
+- 8 × **M3 screws** (8–10 mm) + 8 × **M3 brass heat-set inserts** — the two
+  panels into the shell bosses.
+- A strip of **double-sided foam tape** or a small velcro strap for the battery.
+
 ---
 
 ## 5. Optional / nice-to-have

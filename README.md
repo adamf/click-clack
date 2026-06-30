@@ -119,6 +119,38 @@ Players hammer these buttons, so the top panel is engineered for it:
 Use M3 brass heat-set inserts in the shell bosses and M3 screws (8–10 mm)
 through the counterbores in the panels.
 
+### How everything mounts
+
+Every component has a locating feature in the model — nothing relies on glue
+alone. Generic modules vary between sellers, so the relevant sizes are
+**parameters at the top of `click-clack.scad`** (`OLED_PCB_*`, `OLED_HOLE_*`,
+`DEVKIT_*`, `TP_*`, `BATT_*`); measure your parts and tweak before printing.
+
+- **Screens (2.42″ OLED modules):** each window on the display panel has four
+  **stand-off posts** behind it on the module's mounting-hole pattern, plus
+  corner nibs that locate the board outline. The module drops over the posts
+  (glass toward the window) and is held with four **M2 self-tapping screws**.
+  Set `OLED_HOLE_DX/DY` and `OLED_PCB_W/H` to your module; `OLED_ACT_OFF`
+  shifts the posts if your module's active area isn't centred on the board.
+- **Switches:** Cherry-MX **plate mount** — the 14 mm cutout has a 1.5 mm clip
+  land with an underside relief, so each switch's nylon clips snap in and hold
+  it, exactly like a keyboard plate. No extra hardware.
+- **USB-C charging:** the **TP4056 board *is* the socket.** It sits flat on a
+  small holder against the back wall (side guides + a front stop on 2 mm
+  stand-offs) so its USB-C jack lines up with the back-wall cutout. The cutout
+  is offset left so it clears the centre-button support pillar.
+- **Main board (ESP32-S3-DevKitC-1):** drops into a **cradle** on the floor —
+  a guide frame plus four corner stand-offs that lift the pins off the floor.
+  The DevKitC has no mounting holes, so the cradle captures it by outline; a
+  dab of tape or a printed cap keeps it seated.
+- **Battery (1S LiPo):** sits in a walled **bay** on the floor; secure it with
+  a strap or double-sided foam tape. Wiring passes front-to-back through the
+  notch in the ridge rib.
+
+Rough interior plan: battery front-left, DevKitC front-right (under the screen
+overhang), TP4056 at the back wall, OLED boards hanging off the display panel.
+Dry-fit before final assembly — at 80 mm deep it's snug.
+
 Regenerate the meshes after editing the `.scad`:
 
 ```
