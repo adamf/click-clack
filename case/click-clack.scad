@@ -7,6 +7,7 @@
 //                       Cosmetic face is on the bed; switch reliefs face up.
 //   part = "preview" -> both, assembled, for visual check (do not print).
 //   part = "plate"   -> both parts arranged flat on one build plate.
+//   part = "demo"    -> assembled with representative keycaps (visual only).
 //
 // ---------------------------------------------------------------------------
 // Printing on a Bambu Lab printer (X1 / X1C / P1S / P1P / A1)
@@ -215,6 +216,32 @@ module top_plate_placed() {
 }
 
 // ============================================================
+// keycaps — visualisation only (part = "demo"), never printed
+// ============================================================
+// Big round caps on the clock buttons (Chronos-style), a red cap on center.
+module cap_round(pos, d, h, col) {
+    color(col)
+        on_top_plane()
+            translate([pos[0], pos[1] / cos(slope), 0])
+                union() {
+                    cylinder(d1 = d, d2 = d - 1.5, h = h, $fn = 60);
+                    translate([0, 0, h]) scale([1, 1, 0.22]) sphere(d = d - 1.5, $fn = 60);
+                }
+}
+module cap_square(pos, w, h, col) {
+    color(col)
+        on_top_plane()
+            translate([pos[0], pos[1] / cos(slope), 0])
+                linear_extrude(h) offset(r = 2) square([w - 4, w - 4], center = true);
+}
+module mx_top(pos) {   // hint of the black MX switch housing under the cap
+    color("#1b1b1b")
+        on_top_plane()
+            translate([pos[0], pos[1] / cos(slope), 0])
+                translate([-7.8, -7.8, 0]) cube([15.6, 15.6, 1.2]);
+}
+
+// ============================================================
 // render
 // ============================================================
 if (part == "bottom") {
@@ -225,6 +252,14 @@ if (part == "bottom") {
     // both parts flat on one build plate
     translate([0, -D/2 - 5, 0]) bottom();
     translate([0,  D_slope/2 + 5, 0]) top_plate_flat();
+} else if (part == "demo") {
+    // assembled, with representative keycaps fitted (not a printable part)
+    color("DimGray")   bottom();
+    color("Gainsboro") top_plate_placed();
+    for (s = SWITCHES) mx_top(s);
+    cap_round(P1_POS, 24, 9, "Silver");
+    cap_round(P2_POS, 24, 9, "Silver");
+    cap_square(CENTER_POS, 15, 7, "Crimson");
 } else {
     color("DimGray")  bottom();
     color("Gainsboro") top_plate_placed();
